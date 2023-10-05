@@ -22,12 +22,12 @@ func (app *application) showSecurityCamerasHandler(w http.ResponseWriter, r *htt
 	securityCamera := data.SecurityCamera{
 		ID:                id,
 		CreatedAt:         time.Now(),
-		StorageCapacity:   0,
-		Location:          "",
-		Resolution:        "",
-		FieldOfView:       0,
-		RecordingDuration: 0,
-		PowerSource:       "",
+		StorageCapacity:   900,
+		Location:          "Tole bi",
+		Resolution:        "1080p",
+		FieldOfView:       500,
+		RecordingDuration: 100,
+		PowerSource:       "wire",
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"security_camera": securityCamera}, nil)

@@ -3,14 +3,14 @@ package data
 import "time"
 
 type SecurityCamera struct {
-	ID                int64     `json:"id"`
-	CreatedAt         time.Time `json:"-"`
-	StorageCapacity   int32     `json:"storage_capacity"`
-	Location          string    `json:"location,omitempty"`
-	Resolution        string    `json:"resolution"`
-	FieldOfView       float32   `json:"field_of_view,string"`
-	RecordingDuration int64     `json:"recording_duration"`
-	PowerSource       string    `json:"power_source,omitempty"`
+	ID                int64             `json:"id"`
+	CreatedAt         time.Time         `json:"-"`
+	StorageCapacity   int32             `json:"storage_capacity"`
+	Location          string            `json:"location,omitempty"`
+	Resolution        string            `json:"resolution"`
+	FieldOfView       float32           `json:"field_of_view,string"`
+	RecordingDuration RecordingDuration `json:"recording_duration"`
+	PowerSource       string            `json:"power_source,omitempty"`
 }
 
 //:param camera_id: Unique identifier for the camera (integer)
