@@ -3,6 +3,9 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"time"
+
+	"Project/internal/data"
 )
 
 func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *http.Request) {
@@ -15,5 +18,21 @@ func (app *application) showSecurityCamerasHandler(w http.ResponseWriter, r *htt
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Fprintf(w, "show the details of security camera %d\n", id)
+
+	securityCamera := data.SecurityCamera{
+		ID:                id,
+		CreatedAt:         time.Now(),
+		StorageCapacity:   0,
+		Location:          "",
+		Resolution:        "",
+		FieldOfView:       0,
+		RecordingDuration: 0,
+		PowerSource:       "",
+	}
+
+	err = app.writeJSON(w, http.StatusOK, securityCamera, nil)
+	if err != nil {
+		app.logger.Println(err)
+		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+	}
 }
