@@ -30,7 +30,7 @@ func (app *application) showSecurityCamerasHandler(w http.ResponseWriter, r *htt
 		PowerSource:       "",
 	}
 
-	err = app.writeJSON(w, http.StatusOK, securityCamera, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"security_camera": securityCamera}, nil)
 	if err != nil {
 		app.logger.Println(err)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
