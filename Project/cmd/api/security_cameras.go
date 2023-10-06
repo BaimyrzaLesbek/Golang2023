@@ -2,6 +2,7 @@ package main
 
 import (
 	"Project/internal/data"
+	"Project/internal/validator"
 	"fmt"
 	"net/http"
 	"time"
@@ -23,6 +24,24 @@ func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *h
 		app.badRequestResponse(w, r, err)
 		return
 	}
+
+	securityCamera := &data.SecurityCamera{
+		Manufacturer:      input.Manufacturer,
+		StorageCapacity:   input.StorageCapacity,
+		Location:          input.Location,
+		Resolution:        input.Resolution,
+		FieldOfView:       input.FieldOfView,
+		RecordingDuration: input.RecordingDuration,
+		PowerSource:       input.PowerSource,
+	}
+
+	v := validator.New()
+
+	if data.ValidateSecurityCamera(v, securityCamera); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
 	fmt.Fprintf(w, "%+v\n", input)
 }
 
