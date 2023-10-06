@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"encoding/json"
 )
 
 func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *http.Request) {
@@ -19,9 +17,9 @@ func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *h
 		PowerSource     string  `json:"power_source"`
 	}
 
-	err := json.NewDecoder(r.Body).Decode(&input)
+	err := app.readJSON(w, r, &input)
 	if err != nil {
-		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		app.badRequestResponse(w, r, err)
 		return
 	}
 	fmt.Fprintf(w, "%+v\n", input)
