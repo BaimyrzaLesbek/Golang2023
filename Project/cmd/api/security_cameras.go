@@ -9,12 +9,13 @@ import (
 
 func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Manufacturer    string  `json:"manufacturer"`
-		StorageCapacity int32   `json:"storage_capacity"`
-		Location        string  `json:"location"`
-		Resolution      string  `json:"resolution"`
-		FieldOfView     float32 `json:"field_of_view"`
-		PowerSource     string  `json:"power_source"`
+		Manufacturer      string                 `json:"manufacturer"`
+		StorageCapacity   int32                  `json:"storage_capacity"`
+		Location          string                 `json:"location"`
+		Resolution        string                 `json:"resolution"`
+		FieldOfView       float32                `json:"field_of_view"`
+		RecordingDuration data.RecordingDuration `json:"recording_duration"`
+		PowerSource       string                 `json:"power_source"`
 	}
 
 	err := app.readJSON(w, r, &input)
