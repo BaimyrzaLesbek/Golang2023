@@ -1,15 +1,30 @@
 package main
 
 import (
+	"Project/internal/data"
 	"fmt"
 	"net/http"
 	"time"
 
-	"Project/internal/data"
+	"encoding/json"
 )
 
 func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "create a new security camera")
+	var input struct {
+		Manufacturer    string  `json:"manufacturer"`
+		StorageCapacity int32   `json:"storage_capacity"`
+		Location        string  `json:"location"`
+		Resolution      string  `json:"resolution"`
+		FieldOfView     float32 `json:"field_of_view"`
+		PowerSource     string  `json:"power_source"`
+	}
+
+	err := json.NewDecoder(r.Body).Decode(&input)
+	if err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+	fmt.Fprintf(w, "%+v\n", input)
 }
 
 func (app *application) showSecurityCamerasHandler(w http.ResponseWriter, r *http.Request) {
@@ -22,6 +37,7 @@ func (app *application) showSecurityCamerasHandler(w http.ResponseWriter, r *htt
 	securityCamera := data.SecurityCamera{
 		ID:                id,
 		CreatedAt:         time.Now(),
+		Manufacturer:      "Panasonic",
 		StorageCapacity:   900,
 		Location:          "Tole bi",
 		Resolution:        "1080p",

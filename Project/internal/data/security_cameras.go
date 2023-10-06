@@ -5,6 +5,7 @@ import "time"
 type SecurityCamera struct {
 	ID                int64             `json:"id"`
 	CreatedAt         time.Time         `json:"-"`
+	Manufacturer      string            `json:"manufacturer"`
 	StorageCapacity   int32             `json:"storage_capacity"`
 	Location          string            `json:"location,omitempty"`
 	Resolution        string            `json:"resolution"`
