@@ -1,0 +1,5 @@
+alter table security_cameras drop constraint if exists security_cameras_fieldofview_check;
+
+alter table security_cameras drop constraint if exists security_cameras_storagecapacity_check;
+
+alter table security_cameras drop constraint if exists security_cameras_recordingduration_check;
