@@ -2,6 +2,7 @@ package data
 
 import (
 	"Project/internal/validator"
+	"database/sql"
 	"time"
 )
 
@@ -49,3 +50,23 @@ func ValidateSecurityCamera(v *validator.Validator, securityCamera *SecurityCame
 //:param field_of_view: The area covered by the camera (float)
 //:param recording_duration: Maximum duration for recording in seconds (integer)
 //:param power_source: Power source for the camera (e.g., wired, battery) (string)
+
+type SecurityCameraModel struct {
+	DB *sql.DB
+}
+
+func (s SecurityCameraModel) Insert(SecurityCamera *SecurityCamera) error {
+	return nil
+}
+
+func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
+	return nil, nil
+}
+
+func (s SecurityCameraModel) Update(SecurityCamera *SecurityCamera) error {
+	return nil
+}
+
+func (s SecurityCameraModel) Delete(id int64) error {
+	return nil
+}
