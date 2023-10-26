@@ -3,9 +3,9 @@ package main
 import (
 	"Project/internal/data"
 	"Project/internal/validator"
+	"errors"
 	"fmt"
 	"net/http"
-	"time"
 )
 
 func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *http.Request) {
@@ -64,16 +64,15 @@ func (app *application) showSecurityCamerasHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	securityCamera := data.SecurityCamera{
-		ID:                id,
-		CreatedAt:         time.Now(),
-		Manufacturer:      "Panasonic",
-		StorageCapacity:   900,
-		Location:          "Tole bi",
-		Resolution:        "1080p",
-		FieldOfView:       500,
-		RecordingDuration: 100,
-		PowerSource:       "wire",
+	securityCamera, err := app.models.SecurityCameras.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
 	}
 
 	err = app.writeJSON(w, http.StatusOK, envelope{"security_camera": securityCamera}, nil)

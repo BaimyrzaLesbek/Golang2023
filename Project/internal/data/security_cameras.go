@@ -3,6 +3,7 @@ package data
 import (
 	"Project/internal/validator"
 	"database/sql"
+	"errors"
 	"time"
 )
 
@@ -67,7 +68,34 @@ func (s SecurityCameraModel) Insert(SecurityCamera *SecurityCamera) error {
 }
 
 func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
-	return nil, nil
+	if id < 1 {
+		return nil, ErrRecordNotFound
+	}
+	query := `
+	SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source FROM security_cameras WHERE id = $1
+	`
+	var security_camera SecurityCamera
+	err := s.DB.QueryRow(query, id).Scan(
+		&security_camera.ID,
+		&security_camera.CreatedAt,
+		&security_camera.Manufacturer,
+		&security_camera.StorageCapacity,
+		&security_camera.Location,
+		&security_camera.Resolution,
+		&security_camera.FieldOfView,
+		&security_camera.RecordingDuration,
+		&security_camera.PowerSource,
+	)
+
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return nil, ErrRecordNotFound
+		default:
+			return nil, err
+		}
+	}
+	return &security_camera, nil
 }
 
 func (s SecurityCameraModel) Update(SecurityCamera *SecurityCamera) error {
