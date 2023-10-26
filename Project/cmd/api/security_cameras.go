@@ -42,7 +42,19 @@ func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *h
 		return
 	}
 
-	fmt.Fprintf(w, "%+v\n", input)
+	err = app.models.SecurityCameras.Insert(securityCamera)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	headers := make(http.Header)
+	headers.Set("Location", fmt.Sprintf("/v1/security_cameras/%d", securityCamera.ID))
+	err = app.writeJSON(w, http.StatusCreated, envelope{"movie": securityCamera}, headers)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
 }
 
 func (app *application) showSecurityCamerasHandler(w http.ResponseWriter, r *http.Request) {

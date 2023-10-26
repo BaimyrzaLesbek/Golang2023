@@ -10,11 +10,11 @@ var (
 )
 
 type Models struct {
-	SecurityCamera SecurityCameraModel
+	SecurityCameras SecurityCameraModel
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
-		SecurityCamera: SecurityCameraModel{DB: db},
+		SecurityCameras: SecurityCameraModel{DB: db},
 	}
 }

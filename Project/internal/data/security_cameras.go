@@ -56,7 +56,14 @@ type SecurityCameraModel struct {
 }
 
 func (s SecurityCameraModel) Insert(SecurityCamera *SecurityCamera) error {
-	return nil
+	query := `
+	INSERT INTO security_cameras (manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source)
+	VALUES ($1,$2,$3,$4,$5,$6,$7)
+	RETURNING id, created_at
+	`
+	args := []interface{}{SecurityCamera.Manufacturer, SecurityCamera.StorageCapacity, SecurityCamera.Location, SecurityCamera.Resolution, SecurityCamera.FieldOfView, SecurityCamera.RecordingDuration, SecurityCamera.PowerSource}
+
+	return s.DB.QueryRow(query, args...).Scan(&SecurityCamera.ID, &SecurityCamera.CreatedAt)
 }
 
 func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
