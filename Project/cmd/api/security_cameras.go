@@ -50,7 +50,7 @@ func (app *application) createSecurityCamerasHandler(w http.ResponseWriter, r *h
 
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/v1/security_cameras/%d", securityCamera.ID))
-	err = app.writeJSON(w, http.StatusCreated, envelope{"movie": securityCamera}, headers)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"security_camera": securityCamera}, headers)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -75,6 +75,62 @@ func (app *application) showSecurityCamerasHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
+	err = app.writeJSON(w, http.StatusOK, envelope{"security_camera": securityCamera}, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+func (app *application) updateSecurityCameraHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.readIDParam(r)
+	if err != nil {
+		app.notFoundResponse(w, r)
+		return
+	}
+
+	securityCamera, err := app.models.SecurityCameras.Get(id)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			app.notFoundResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+	var input struct {
+		Manufacturer      string                 `json:"manufacturer"`
+		StorageCapacity   int32                  `json:"storage_capacity"`
+		Location          string                 `json:"location"`
+		Resolution        string                 `json:"resolution"`
+		FieldOfView       float32                `json:"field_of_view"`
+		RecordingDuration data.RecordingDuration `json:"recording_duration"`
+		PowerSource       string                 `json:"power_source"`
+	}
+
+	err = app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+	}
+	securityCamera.Manufacturer = input.Manufacturer
+	securityCamera.StorageCapacity = input.StorageCapacity
+	securityCamera.Location = input.Location
+	securityCamera.Resolution = input.Resolution
+	securityCamera.FieldOfView = input.FieldOfView
+	securityCamera.RecordingDuration = input.RecordingDuration
+	securityCamera.PowerSource = input.PowerSource
+
+	v := validator.New()
+
+	if data.ValidateSecurityCamera(v, securityCamera); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+	err = app.models.SecurityCameras.Update(securityCamera)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 	err = app.writeJSON(w, http.StatusOK, envelope{"security_camera": securityCamera}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)

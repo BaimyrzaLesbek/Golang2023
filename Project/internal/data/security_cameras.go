@@ -99,7 +99,23 @@ func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
 }
 
 func (s SecurityCameraModel) Update(SecurityCamera *SecurityCamera) error {
-	return nil
+	query := `
+	UPDATE security_cameras SET manufacturer = $1, storage_capacity = $2, location = $3, resolution = $4,
+	                            field_of_view = $5, recording_duration = $6, power_source = $7 
+	                        WHERE id = $8 
+	                        RETURNING id, created_at;
+	`
+	args := []interface{}{
+		SecurityCamera.Manufacturer,
+		SecurityCamera.StorageCapacity,
+		SecurityCamera.Location,
+		SecurityCamera.Resolution,
+		SecurityCamera.FieldOfView,
+		SecurityCamera.RecordingDuration,
+		SecurityCamera.PowerSource,
+		SecurityCamera.ID,
+	}
+	return s.DB.QueryRow(query, args...).Scan(&SecurityCamera.ID, &SecurityCamera.CreatedAt)
 }
 
 func (s SecurityCameraModel) Delete(id int64) error {
