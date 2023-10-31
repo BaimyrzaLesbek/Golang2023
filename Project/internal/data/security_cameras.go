@@ -119,5 +119,24 @@ func (s SecurityCameraModel) Update(SecurityCamera *SecurityCamera) error {
 }
 
 func (s SecurityCameraModel) Delete(id int64) error {
+	if id < 1 {
+		return ErrRecordNotFound
+	}
+	query := `
+	DELETE FROM security_cameras WHERE id = $1
+	`
+	result, err := s.DB.Exec(query, id)
+
+	if err != nil {
+		return err
+	}
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+
 	return nil
 }
