@@ -99,26 +99,41 @@ func (app *application) updateSecurityCameraHandler(w http.ResponseWriter, r *ht
 		return
 	}
 	var input struct {
-		Manufacturer      string                 `json:"manufacturer"`
-		StorageCapacity   int32                  `json:"storage_capacity"`
-		Location          string                 `json:"location"`
-		Resolution        string                 `json:"resolution"`
-		FieldOfView       float32                `json:"field_of_view"`
-		RecordingDuration data.RecordingDuration `json:"recording_duration"`
-		PowerSource       string                 `json:"power_source"`
+		Manufacturer      *string                 `json:"manufacturer"`
+		StorageCapacity   *int32                  `json:"storage_capacity"`
+		Location          *string                 `json:"location"`
+		Resolution        *string                 `json:"resolution"`
+		FieldOfView       *float32                `json:"field_of_view"`
+		RecordingDuration *data.RecordingDuration `json:"recording_duration"`
+		PowerSource       *string                 `json:"power_source"`
 	}
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
 		app.badRequestResponse(w, r, err)
+		return
 	}
-	securityCamera.Manufacturer = input.Manufacturer
-	securityCamera.StorageCapacity = input.StorageCapacity
-	securityCamera.Location = input.Location
-	securityCamera.Resolution = input.Resolution
-	securityCamera.FieldOfView = input.FieldOfView
-	securityCamera.RecordingDuration = input.RecordingDuration
-	securityCamera.PowerSource = input.PowerSource
+	if input.Manufacturer != nil {
+		securityCamera.Manufacturer = *input.Manufacturer
+	}
+	if input.StorageCapacity != nil {
+		securityCamera.StorageCapacity = *input.StorageCapacity
+	}
+	if input.Location != nil {
+		securityCamera.Location = *input.Location
+	}
+	if input.Resolution != nil {
+		securityCamera.Resolution = *input.Resolution
+	}
+	if input.FieldOfView != nil {
+		securityCamera.FieldOfView = *input.FieldOfView
+	}
+	if input.RecordingDuration != nil {
+		securityCamera.RecordingDuration = *input.RecordingDuration
+	}
+	if input.PowerSource != nil {
+		securityCamera.PowerSource = *input.PowerSource
+	}
 
 	v := validator.New()
 
