@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -174,13 +175,12 @@ func (s SecurityCameraModel) Delete(id int64) error {
 
 func (s SecurityCameraModel) GetAll(manufacturer string, resolution string, filters Filters) ([]*SecurityCamera, error) {
 
-	query := `
+	query := fmt.Sprintf(`
 		SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source, version 
 		FROM security_cameras
 		WHERE (to_tsvector('simple', manufacturer) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', resolution) @@ plainto_tsquery('simple', $2) OR $2 = '')
-		ORDER BY id
-		`
+		ORDER BY %s %s, id ASC`, filters.sortColumn(), filters.sortDirection())
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
