@@ -156,6 +156,7 @@ func (app *application) updateSecurityCameraHandler(w http.ResponseWriter, r *ht
 		app.serverErrorResponse(w, r, err)
 	}
 }
+
 func (app *application) deleteSecurityCameraHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
@@ -177,4 +178,31 @@ func (app *application) deleteSecurityCameraHandler(w http.ResponseWriter, r *ht
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+func (app *application) listSec_CamerasHandler(w http.ResponseWriter, r *http.Request) {
+	var input struct {
+		Manufacturer string
+		Resolution   string
+		data.Filters
+	}
+
+	v := validator.New()
+
+	qs := r.URL.Query()
+
+	input.Manufacturer = app.readString(qs, "manufacturer", "")
+	input.Resolution = app.readString(qs, "resolution", "")
+
+	input.Filters.Page = app.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+
+	input.Filters.Sort = app.readString(qs, "sort", "id")
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	fmt.Fprintf(w, "%+v\n", input)
 }
