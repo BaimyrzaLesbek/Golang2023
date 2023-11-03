@@ -7,5 +7,6 @@ CREATE TABLE if not exists security_cameras (
      resolution VARCHAR(255) NOT NULL,
      field_of_view REAL NOT NULL,
      recording_duration INT NOT NULL,
-     power_source VARCHAR(255)
+     power_source VARCHAR(255),
+     version integer NOT NULL DEFAULT 1
 );

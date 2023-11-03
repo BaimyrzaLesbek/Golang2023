@@ -17,6 +17,7 @@ type SecurityCamera struct {
 	FieldOfView       float32           `json:"field_of_view,string"`
 	RecordingDuration RecordingDuration `json:"recording_duration"`
 	PowerSource       string            `json:"power_source,omitempty"`
+	Version           int32             `json:"version"`
 }
 
 func ValidateSecurityCamera(v *validator.Validator, securityCamera *SecurityCamera) {
@@ -60,11 +61,11 @@ func (s SecurityCameraModel) Insert(SecurityCamera *SecurityCamera) error {
 	query := `
 	INSERT INTO security_cameras (manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source)
 	VALUES ($1,$2,$3,$4,$5,$6,$7)
-	RETURNING id, created_at
+	RETURNING id, created_at, version
 	`
 	args := []interface{}{SecurityCamera.Manufacturer, SecurityCamera.StorageCapacity, SecurityCamera.Location, SecurityCamera.Resolution, SecurityCamera.FieldOfView, SecurityCamera.RecordingDuration, SecurityCamera.PowerSource}
 
-	return s.DB.QueryRow(query, args...).Scan(&SecurityCamera.ID, &SecurityCamera.CreatedAt)
+	return s.DB.QueryRow(query, args...).Scan(&SecurityCamera.ID, &SecurityCamera.CreatedAt, &SecurityCamera.Version)
 }
 
 func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
@@ -72,7 +73,7 @@ func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
 		return nil, ErrRecordNotFound
 	}
 	query := `
-	SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source FROM security_cameras WHERE id = $1
+	SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source, version FROM security_cameras WHERE id = $1
 	`
 	var security_camera SecurityCamera
 	err := s.DB.QueryRow(query, id).Scan(
@@ -85,6 +86,7 @@ func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
 		&security_camera.FieldOfView,
 		&security_camera.RecordingDuration,
 		&security_camera.PowerSource,
+		&security_camera.Version,
 	)
 
 	if err != nil {
@@ -102,8 +104,8 @@ func (s SecurityCameraModel) Update(SecurityCamera *SecurityCamera) error {
 	query := `
 	UPDATE security_cameras SET manufacturer = $1, storage_capacity = $2, location = $3, resolution = $4,
 	                            field_of_view = $5, recording_duration = $6, power_source = $7 
-	                        WHERE id = $8 
-	                        RETURNING id, created_at;
+	                        WHERE id = $8 and version = $9
+	                        RETURNING version;
 	`
 	args := []interface{}{
 		SecurityCamera.Manufacturer,
@@ -114,8 +116,18 @@ func (s SecurityCameraModel) Update(SecurityCamera *SecurityCamera) error {
 		SecurityCamera.RecordingDuration,
 		SecurityCamera.PowerSource,
 		SecurityCamera.ID,
+		SecurityCamera.Version,
 	}
-	return s.DB.QueryRow(query, args...).Scan(&SecurityCamera.ID, &SecurityCamera.CreatedAt)
+	err := s.DB.QueryRow(query, args...).Scan(&SecurityCamera.Version)
+	if err != nil {
+		switch {
+		case errors.Is(err, sql.ErrNoRows):
+			return ErrEditConflict
+		default:
+			return err
+		}
+	}
+	return nil
 }
 
 func (s SecurityCameraModel) Delete(id int64) error {

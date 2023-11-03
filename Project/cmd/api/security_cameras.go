@@ -143,7 +143,12 @@ func (app *application) updateSecurityCameraHandler(w http.ResponseWriter, r *ht
 	}
 	err = app.models.SecurityCameras.Update(securityCamera)
 	if err != nil {
-		app.serverErrorResponse(w, r, err)
+		switch {
+		case errors.Is(err, data.ErrEditConflict):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
 		return
 	}
 	err = app.writeJSON(w, http.StatusOK, envelope{"security_camera": securityCamera}, nil)
