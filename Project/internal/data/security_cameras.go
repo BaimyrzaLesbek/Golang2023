@@ -177,8 +177,8 @@ func (s SecurityCameraModel) GetAll(manufacturer string, resolution string, filt
 	query := `
 		SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source, version 
 		FROM security_cameras
-		WHERE (LOWER(manufacturer) = LOWER($1) OR $1 = '')
-		AND (LOWER(resolution) = LOWER($2) OR $2 = '')
+		WHERE (to_tsvector('simple', manufacturer) @@ plainto_tsquery('simple', $1) OR $1 = '')
+		AND (to_tsvector('simple', resolution) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		ORDER BY id
 		`
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
