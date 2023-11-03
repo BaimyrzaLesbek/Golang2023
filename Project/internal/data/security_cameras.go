@@ -180,11 +180,14 @@ func (s SecurityCameraModel) GetAll(manufacturer string, resolution string, filt
 		FROM security_cameras
 		WHERE (to_tsvector('simple', manufacturer) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', resolution) @@ plainto_tsquery('simple', $2) OR $2 = '')
-		ORDER BY %s %s, id ASC`, filters.sortColumn(), filters.sortDirection())
+		ORDER BY %s %s, id ASC
+		LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortDirection())
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	rows, err := s.DB.QueryContext(ctx, query, manufacturer, resolution)
+	args := []interface{}{manufacturer, resolution, filters.limit(), filters.offset()}
+
+	rows, err := s.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}
