@@ -171,3 +171,48 @@ func (s SecurityCameraModel) Delete(id int64) error {
 
 	return nil
 }
+
+func (s SecurityCameraModel) GetAll(manufacturer string, resolution string, filters Filters) ([]*SecurityCamera, error) {
+
+	query := `
+		SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source, version 
+		FROM security_cameras
+		ORDER BY id
+		`
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	rows, err := s.DB.QueryContext(ctx, query)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	security_cameras := []*SecurityCamera{}
+
+	for rows.Next() {
+		var securitycamera SecurityCamera
+		err := rows.Scan(
+			&securitycamera.ID,
+			&securitycamera.CreatedAt,
+			&securitycamera.Manufacturer,
+			&securitycamera.StorageCapacity,
+			&securitycamera.Location,
+			&securitycamera.Resolution,
+			&securitycamera.FieldOfView,
+			&securitycamera.RecordingDuration,
+			&securitycamera.PowerSource,
+			&securitycamera.Version,
+		)
+		if err != nil {
+			return nil, err
+		}
+		security_cameras = append(security_cameras, &securitycamera)
+	}
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+	return security_cameras, nil
+
+}
