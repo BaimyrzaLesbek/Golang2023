@@ -2,6 +2,7 @@ package data
 
 import (
 	"Project/internal/validator"
+	"context"
 	"database/sql"
 	"errors"
 	"time"
@@ -65,7 +66,10 @@ func (s SecurityCameraModel) Insert(SecurityCamera *SecurityCamera) error {
 	`
 	args := []interface{}{SecurityCamera.Manufacturer, SecurityCamera.StorageCapacity, SecurityCamera.Location, SecurityCamera.Resolution, SecurityCamera.FieldOfView, SecurityCamera.RecordingDuration, SecurityCamera.PowerSource}
 
-	return s.DB.QueryRow(query, args...).Scan(&SecurityCamera.ID, &SecurityCamera.CreatedAt, &SecurityCamera.Version)
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	return s.DB.QueryRowContext(ctx, query, args...).Scan(&SecurityCamera.ID, &SecurityCamera.CreatedAt, &SecurityCamera.Version)
 }
 
 func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
@@ -73,10 +77,17 @@ func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
 		return nil, ErrRecordNotFound
 	}
 	query := `
-	SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source, version FROM security_cameras WHERE id = $1
+	SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source, version 
+	FROM security_cameras 
+	WHERE id = $1
 	`
 	var security_camera SecurityCamera
-	err := s.DB.QueryRow(query, id).Scan(
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+
+	defer cancel()
+
+	err := s.DB.QueryRowContext(ctx, query, id).Scan(
 		&security_camera.ID,
 		&security_camera.CreatedAt,
 		&security_camera.Manufacturer,
@@ -103,7 +114,7 @@ func (s SecurityCameraModel) Get(id int64) (*SecurityCamera, error) {
 func (s SecurityCameraModel) Update(SecurityCamera *SecurityCamera) error {
 	query := `
 	UPDATE security_cameras SET manufacturer = $1, storage_capacity = $2, location = $3, resolution = $4,
-	                            field_of_view = $5, recording_duration = $6, power_source = $7 
+	                            field_of_view = $5, recording_duration = $6, power_source = $7, version = version + 1
 	                        WHERE id = $8 and version = $9
 	                        RETURNING version;
 	`
@@ -118,7 +129,11 @@ func (s SecurityCameraModel) Update(SecurityCamera *SecurityCamera) error {
 		SecurityCamera.ID,
 		SecurityCamera.Version,
 	}
-	err := s.DB.QueryRow(query, args...).Scan(&SecurityCamera.Version)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	err := s.DB.QueryRowContext(ctx, query, args...).Scan(&SecurityCamera.Version)
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
@@ -137,7 +152,11 @@ func (s SecurityCameraModel) Delete(id int64) error {
 	query := `
 	DELETE FROM security_cameras WHERE id = $1
 	`
-	result, err := s.DB.Exec(query, id)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+
+	result, err := s.DB.ExecContext(ctx, query, id)
 
 	if err != nil {
 		return err
