@@ -173,10 +173,10 @@ func (s SecurityCameraModel) Delete(id int64) error {
 	return nil
 }
 
-func (s SecurityCameraModel) GetAll(manufacturer string, resolution string, filters Filters) ([]*SecurityCamera, error) {
+func (s SecurityCameraModel) GetAll(manufacturer string, resolution string, filters Filters) ([]*SecurityCamera, Metadata, error) {
 
 	query := fmt.Sprintf(`
-		SELECT id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source, version 
+		SELECT count(*) OVER(), id, created_at, manufacturer, storage_capacity, location, resolution, field_of_view, recording_duration, power_source, version 
 		FROM security_cameras
 		WHERE (to_tsvector('simple', manufacturer) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', resolution) @@ plainto_tsquery('simple', $2) OR $2 = '')
@@ -189,16 +189,18 @@ func (s SecurityCameraModel) GetAll(manufacturer string, resolution string, filt
 
 	rows, err := s.DB.QueryContext(ctx, query, args...)
 	if err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
 
 	defer rows.Close()
 
+	totalRecords := 0
 	security_cameras := []*SecurityCamera{}
 
 	for rows.Next() {
 		var securitycamera SecurityCamera
 		err := rows.Scan(
+			&totalRecords,
 			&securitycamera.ID,
 			&securitycamera.CreatedAt,
 			&securitycamera.Manufacturer,
@@ -211,13 +213,15 @@ func (s SecurityCameraModel) GetAll(manufacturer string, resolution string, filt
 			&securitycamera.Version,
 		)
 		if err != nil {
-			return nil, err
+			return nil, Metadata{}, err
 		}
 		security_cameras = append(security_cameras, &securitycamera)
 	}
 	if err = rows.Err(); err != nil {
-		return nil, err
+		return nil, Metadata{}, err
 	}
-	return security_cameras, nil
+
+	metadata := calculateMetadata(totalRecords, filters.Page, filters.PageSize)
+	return security_cameras, metadata, nil
 
 }

@@ -204,12 +204,12 @@ func (app *application) listSec_CamerasHandler(w http.ResponseWriter, r *http.Re
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
-	security_cameras, err := app.models.SecurityCameras.GetAll(input.Manufacturer, input.Resolution, input.Filters)
+	security_cameras, metadata, err := app.models.SecurityCameras.GetAll(input.Manufacturer, input.Resolution, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
-	err = app.writeJSON(w, http.StatusOK, envelope{"security_cameras": security_cameras}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"security_cameras": security_cameras, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
