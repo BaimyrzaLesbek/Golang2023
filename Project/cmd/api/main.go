@@ -100,3 +100,8 @@ func openDB(cfg config) (*sql.DB, error) {
 	}
 	return db, nil
 }
+
+func (app *application) rateLimitExceededResponse(w http.ResponseWriter, r *http.Request) {
+	message := "rate limit exceeded"
+	app.errorResponse(w, r, http.StatusTooManyRequests, message)
+}
