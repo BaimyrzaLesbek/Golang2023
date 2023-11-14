@@ -20,5 +20,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/security_cameras/:id", app.updateSecurityCameraHandler)
 	router.HandlerFunc(http.MethodDelete, "/v1/security_cameras/:id", app.deleteSecurityCameraHandler)
 
+	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
+
 	return app.recoverPanic(app.rateLimit(router))
 }
