@@ -12,10 +12,12 @@ var (
 
 type Models struct {
 	SecurityCameras SecurityCameraModel
+	Users           UserModel
 }
 
 func NewModels(db *sql.DB) Models {
 	return Models{
 		SecurityCameras: SecurityCameraModel{DB: db},
+		Users:           UserModel{DB: db},
 	}
 }
