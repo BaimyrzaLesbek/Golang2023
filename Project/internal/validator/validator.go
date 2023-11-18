@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	EmailRX = regexp.MustCompile(`^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
+	EmailRX = regexp.MustCompile(`^[A-Za-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`)
 	//ResolutionPattern = regexp.MustCompile("^[0-9]+p$")
 )
 
