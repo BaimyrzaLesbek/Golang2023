@@ -14,11 +14,11 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
-	router.HandlerFunc(http.MethodGet, "/v1/security_cameras", app.listSec_CamerasHandler)
-	router.HandlerFunc(http.MethodPost, "/v1/security_cameras", app.createSecurityCamerasHandler)
-	router.HandlerFunc(http.MethodGet, "/v1/security_cameras/:id", app.showSecurityCamerasHandler)
-	router.HandlerFunc(http.MethodPatch, "/v1/security_cameras/:id", app.updateSecurityCameraHandler)
-	router.HandlerFunc(http.MethodDelete, "/v1/security_cameras/:id", app.deleteSecurityCameraHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/security_cameras", app.requireActivatedUser(app.listSec_CamerasHandler))
+	router.HandlerFunc(http.MethodPost, "/v1/security_cameras", app.requireActivatedUser(app.createSecurityCamerasHandler))
+	router.HandlerFunc(http.MethodGet, "/v1/security_cameras/:id", app.requireActivatedUser(app.showSecurityCamerasHandler))
+	router.HandlerFunc(http.MethodPatch, "/v1/security_cameras/:id", app.requireActivatedUser(app.updateSecurityCameraHandler))
+	router.HandlerFunc(http.MethodDelete, "/v1/security_cameras/:id", app.requireActivatedUser(app.deleteSecurityCameraHandler))
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
